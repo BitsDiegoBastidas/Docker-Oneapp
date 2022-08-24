@@ -1,0 +1,39 @@
+version: '3'
+services:
+  db_COUNTRY:
+    container_name: oneapp_COUNTRY
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: oneapp_COUNTRY
+    volumes:
+      - oneapp_COUNTRY:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      COUNTRY_net:
+        ipv4_address: 10.5.0.5
+  oneapp_COUNTRY:
+    container_name: oneapp_COUNTRY_project
+    depends_on:
+      - db_COUNTRY
+    volumes:
+      - .:/usr/share/nginx/html
+    image: oneapp_COUNTRY_project
+    build: ./image_files/
+    privileged: true
+    ports:
+      - "8081:80"
+    networks:
+      COUNTRY_net:
+        ipv4_address: 10.5.0.6
+    command: /usr/sbin/init && systemctl restart php-fpm.service && systemctl restart nginx.service
+networks:
+  COUNTRY_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+volumes:
+  oneapp_COUNTRY:
